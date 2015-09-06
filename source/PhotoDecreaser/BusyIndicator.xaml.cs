@@ -26,7 +26,7 @@ namespace PhotoDecreaser
             Canvas.SetZIndex( this, 1 );
         }
 
-        public Boolean IsBusy
+        public bool IsBusy
         {
             get
             {
@@ -38,7 +38,7 @@ namespace PhotoDecreaser
             }
         }
 
-        public Double PercentCompleted
+        public double PercentCompleted
         {
             get
             {
@@ -51,7 +51,7 @@ namespace PhotoDecreaser
             }
         }
 
-        public void SetCustomMessage( String message )
+        public void SetCustomMessage( string message )
         {
             textBlock.Text = message;
         }

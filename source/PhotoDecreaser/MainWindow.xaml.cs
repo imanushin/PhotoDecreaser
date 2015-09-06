@@ -21,7 +21,7 @@ namespace PhotoDecreaser
     {
         private readonly ObservableCollection<PhotoInfo> files = new ObservableCollection<PhotoInfo>();
 
-        private String saveFolderPath = "Поиск каталога...";
+        private string saveFolderPath = "Поиск каталога...";
 
         private readonly BackgroundWorker openFileWorker = new BackgroundWorker();
         private readonly BackgroundWorker fileSaveWorker = new BackgroundWorker();
@@ -70,12 +70,12 @@ namespace PhotoDecreaser
 
         private void SelectPhoto( object sender, RoutedEventArgs e )
         {
-            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            var dialog = new Microsoft.Win32.OpenFileDialog();
 
             dialog.Filter = "Фотографии JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg";
             dialog.Multiselect = true;
 
-            Boolean? result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
             if ( !result.HasValue || !result.Value )
                 return;
@@ -101,9 +101,9 @@ namespace PhotoDecreaser
         {
             photosGrid.Children.Clear();
 
-            foreach ( PhotoInfo photo in files )
+            foreach ( var photo in files )
             {
-                Image newImage = new Image()
+                var newImage = new Image()
                 {
                     Source = photo.Photo,
                     Tag = photo,
@@ -122,16 +122,16 @@ namespace PhotoDecreaser
 
         private void OpenSelectedFiles( object sender, DoWorkEventArgs e )
         {
-            OpenFiles( e.Argument as IEnumerable<String> );
+            OpenFiles( e.Argument as IEnumerable<string> );
         }
 
-        private void OpenFiles( IEnumerable<String> fileNames )
+        private void OpenFiles( IEnumerable<string> fileNames )
         {
             var files = fileNames.ToList();
 
-            for ( int i = 0; i < files.Count; i++ )
+            for ( var i = 0; i < files.Count; i++ )
             {
-                string fileName = files[ i ];
+                var fileName = files[ i ];
 
                 try
                 {
@@ -152,17 +152,17 @@ namespace PhotoDecreaser
 
         private void newImage_MouseLeftButtonUp( object sender, System.Windows.Input.MouseButtonEventArgs e )
         {
-            Image img = e.OriginalSource as Image;
+            var img = e.OriginalSource as Image;
 
             if ( img == null )
                 return;
 
-            PhotoInfo photo = img.Tag as PhotoInfo;
+            var photo = img.Tag as PhotoInfo;
 
             if ( photo == null )
                 return;
 
-            MessageBoxResult result = System.Windows.MessageBox.Show( "Удалить выбранное изображение?", "Удаление фотографии", MessageBoxButton.YesNo, MessageBoxImage.Question );
+            var result = System.Windows.MessageBox.Show( "Удалить выбранное изображение?", "Удаление фотографии", MessageBoxButton.YesNo, MessageBoxImage.Question );
 
             if ( result != MessageBoxResult.Yes )
                 return;
@@ -190,11 +190,11 @@ namespace PhotoDecreaser
 
         private void SaveFileWorker_DoWork( object sender, DoWorkEventArgs e )
         {
-            for ( int i = 0; i < files.Count; i++ )
+            for ( var i = 0; i < files.Count; i++ )
             {
                 var file = files[ i ];
 
-                String newFile = Path.Combine( saveFolderPath, ( i + 1 ).ToString() + ".jpg" );
+                var newFile = Path.Combine( saveFolderPath, ( i + 1 ).ToString() + ".jpg" );
 
                 file.SaveFile( newFile );
 
@@ -204,11 +204,11 @@ namespace PhotoDecreaser
 
         private void SelectSaveFolder( object sender, RoutedEventArgs e )
         {
-            using ( FolderBrowserDialog saveDialog = new FolderBrowserDialog() )
+            using ( var saveDialog = new FolderBrowserDialog() )
             {
                 saveDialog.SelectedPath = saveFolderPath;
 
-                DialogResult dialogResult = saveDialog.ShowDialog();
+                var dialogResult = saveDialog.ShowDialog();
 
                 if ( dialogResult != System.Windows.Forms.DialogResult.OK )
                     return;
@@ -221,7 +221,7 @@ namespace PhotoDecreaser
 
         private void widthSize_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
         {
-            Double value = Math.Pow( 2, widthSize.Value );
+            var value = Math.Pow( 2, widthSize.Value );
 
             if ( photosGrid != null )
             {

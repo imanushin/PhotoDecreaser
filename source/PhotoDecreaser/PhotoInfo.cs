@@ -11,11 +11,11 @@ namespace PhotoDecreaser
     internal sealed class PhotoInfo
     {
         private const long maxFileLenght = 300 * 1024;
-        private readonly Byte[] photoData;
+        private readonly byte[] photoData;
 
-        public PhotoInfo( String fileName )
+        public PhotoInfo( string fileName )
         {
-            ImageAndSource image = DecreaseImage( fileName );
+            var image = DecreaseImage( fileName );
 
             photoData = image.source;
 
@@ -28,13 +28,7 @@ namespace PhotoDecreaser
             private set;
         }
 
-        public int FileLenght
-        {
-            get
-            {
-                return photoData.Length;
-            }
-        }
+        public int FileLenght => photoData.Length;
 
         public MemoryStream CreateStream()
         {
@@ -50,34 +44,33 @@ namespace PhotoDecreaser
             }
             catch
             {
-                if ( result != null )
-                    result.Close();
+                result?.Close();
 
                 throw;
             }
         }
 
-        private static ImageAndSource DecreaseImage( String inputFile )
+        private static ImageAndSource DecreaseImage( string inputFile )
         {
-            Int64 newLenght = maxFileLenght * 3;
+            var newLenght = maxFileLenght * 3;
 
-            Int64 initialLength = new FileInfo( inputFile ).Length;
+            var initialLength = new FileInfo( inputFile ).Length;
 
-            BitmapImage initialImage = new BitmapImage( new Uri( inputFile ), new RequestCachePolicy( RequestCacheLevel.NoCacheNoStore ) );
+            var initialImage = new BitmapImage( new Uri( inputFile ), new RequestCachePolicy( RequestCacheLevel.NoCacheNoStore ) );
 
             initialImage.Freeze();
 
             while ( true )
             {
-                using ( MemoryStream scaledImage = new MemoryStream() )
+                using ( var scaledImage = new MemoryStream() )
                 {
-                    Double scale = Math.Sqrt( ( ( ( double )newLenght ) / initialLength ) );
+                    var scale = Math.Sqrt( ( ( ( double )newLenght ) / initialLength ) );
 
-                    TransformedBitmap transformed = new TransformedBitmap( initialImage, new ScaleTransform( scale, scale ) );
+                    var transformed = new TransformedBitmap( initialImage, new ScaleTransform( scale, scale ) );
 
                     transformed.Freeze();
 
-                    JpegBitmapEncoder saver = new JpegBitmapEncoder();                    
+                    var saver = new JpegBitmapEncoder();                    
 
                     saver.Frames.Add( BitmapFrame.Create( transformed ) );
 

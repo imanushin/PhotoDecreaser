@@ -8,7 +8,7 @@ namespace PhotoDecreaser
 {
     internal static class FolderSelector
     {
-        public static String FindFreeDirectory()
+        public static string FindFreeDirectory()
         {
             var parentFolder = "c:\\";
 
@@ -40,7 +40,7 @@ namespace PhotoDecreaser
 
             var result = Path.Combine( photosFolder, datePreffix );
 
-            int i = 1;
+            var i = 1;
 
             while ( Directory.Exists( result ) )
             {
