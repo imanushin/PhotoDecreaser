@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="PhotoDecreaser.BusyIndicator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#1C0000FF" Visibility="Collapsed">
+    <Grid VerticalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Пожалуйста, ждите..." VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Margin="10" Name="textBlock"/>
+        <ProgressBar Name="progressBar" Grid.Row="1" Height="25" Grid.Column="1" Margin="10" Maximum="100" Minimum="0"/>
+    </Grid>
+</UserControl>

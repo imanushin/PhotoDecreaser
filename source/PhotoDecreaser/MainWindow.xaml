@@ -1,0 +1,54 @@
+﻿<Window x:Class="PhotoDecreaser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:this="clr-namespace:PhotoDecreaser"
+        Title="Конвертер фотографий" 
+        WindowState="Maximized" 
+        x:ClassModifier="internal"
+        Icon="/PhotoDecreaser;component/Resources/Car.ico" 
+        mc:Ignorable="d" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        d:DesignHeight="300" d:DesignWidth="700" >
+    <Window.Resources>
+        <Style x:Key="baseStyle" TargetType="FrameworkElement">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+    <Grid >
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Выбрать фотографии" Click="SelectPhoto" Style="{StaticResource ResourceKey=baseStyle}" ToolTip="Выбрать фотографии вручную."/>
+                <Button Content="Очистить список" Click="ClearPhotoGrid"  Style="{StaticResource ResourceKey=baseStyle}" ToolTip="Очистить список выбранных фотографий."/>
+            </StackPanel>
+            <Button Content="Сохранить" Click="SavePhoto"  Style="{StaticResource ResourceKey=baseStyle}" Grid.Row="1" HorizontalAlignment="Left"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="2">
+                <TextBlock Text="Папка для сохранения: " VerticalAlignment="Center" Style="{StaticResource ResourceKey=baseStyle}"/>
+                <TextBlock Name="saveFolder" VerticalAlignment="Center" Style="{StaticResource ResourceKey=baseStyle}"/>
+                <Button Content="Изменить" Click="SelectSaveFolder" Style="{StaticResource ResourceKey=baseStyle}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right">
+                <TextBlock Text="Размер фотографии" Style="{StaticResource ResourceKey=baseStyle}"/>
+                <Slider Name="widthSize" Width="200" Style="{StaticResource ResourceKey=baseStyle}" Minimum="5" Maximum="11" ValueChanged="widthSize_ValueChanged" Value="7"/>
+            </StackPanel>
+            <ScrollViewer Grid.Row="3">
+                <WrapPanel Name="photosGrid"  MouseWheel="scrollViewer_MouseWheel" />
+            </ScrollViewer>
+        </Grid>
+        <this:BusyIndicator x:Name="busyIndicator" Grid.RowSpan="5" />
+        <StatusBar Grid.Row="5"  VerticalAlignment="Bottom" Height="20" >
+            <TextBlock Name="photoCount"/>
+        </StatusBar>
+    </Grid>
+</Window>
