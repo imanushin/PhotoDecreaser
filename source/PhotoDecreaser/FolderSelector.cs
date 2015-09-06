@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace PhotoDecreaser
@@ -44,7 +41,7 @@ namespace PhotoDecreaser
 
             while ( Directory.Exists( result ) )
             {
-                var innerDirectoryName = datePreffix + " (" + i.ToString() + ')';
+                var innerDirectoryName = datePreffix + " (" + i + ')';
 
                 result = Path.Combine( photosFolder, innerDirectoryName );
 

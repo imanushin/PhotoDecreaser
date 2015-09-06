@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Windows.Controls;
+using System.IO;
+using System.Net.Cache;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.IO;
-using System.Collections.Generic;
-using System.Net.Cache;
 
 namespace PhotoDecreaser
 {
@@ -30,7 +29,7 @@ namespace PhotoDecreaser
 
         public int FileLenght => photoData.Length;
 
-        public MemoryStream CreateStream()
+        public async Task<MemoryStream> CreateStream()
         {
             MemoryStream result = null;
 
@@ -38,7 +37,7 @@ namespace PhotoDecreaser
             {
                 result = new MemoryStream();
 
-                result.Write( photoData, 0, photoData.Length );
+                await result.WriteAsync( photoData, 0, photoData.Length );
 
                 return result;
             }
@@ -55,7 +54,7 @@ namespace PhotoDecreaser
             var newLenght = maxFileLenght * 3;
 
             var initialLength = new FileInfo( inputFile ).Length;
-
+            
             var initialImage = new BitmapImage( new Uri( inputFile ), new RequestCachePolicy( RequestCacheLevel.NoCacheNoStore ) );
 
             initialImage.Freeze();

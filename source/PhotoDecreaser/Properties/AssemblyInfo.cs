@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -54,4 +53,4 @@ using System.Windows;
 [assembly: AssemblyVersion( "1.4.0.0" )]
 [assembly: AssemblyFileVersion( "1.4.0.0" )]
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Tests")]
+[assembly: InternalsVisibleTo("Tests")]
