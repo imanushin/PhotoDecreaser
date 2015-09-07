@@ -94,9 +94,12 @@ namespace PhotoDecreaser
             }
         }
 
-        public void SaveFile( string newFile )
+        public async Task SaveFileAsync( string newFile )
         {
-            File.WriteAllBytes( newFile, photoData );
+            using (var stream = File.Open(newFile, FileMode.Create))
+            {
+                await stream.WriteAsync(photoData, 0, photoData.Length).ConfigureAwait(false);
+            }
         }
 
         private class ImageAndSource

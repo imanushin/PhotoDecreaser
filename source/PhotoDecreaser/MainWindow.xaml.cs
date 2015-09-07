@@ -37,40 +37,18 @@ namespace PhotoDecreaser
         {
             InitializeComponent();
 
-            /*saveFolderFounder.DoWork += new DoWorkEventHandler( saveFolderFounder_DoWork );
-            saveFolderFounder.RunWorkerCompleted += new RunWorkerCompletedEventHandler( saveFolderFounder_RunWorkerCompleted );
-            saveFolderFounder.RunWorkerAsync();*/
-
-            widthSize_ValueChanged( null, null );
-
-           /* openFileWorker.DoWork += new DoWorkEventHandler( OpenSelectedFiles );
-            openFileWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler( OpenSelectedFilesCompleted );*/
-
-           /* fileSaveWorker.DoWork += new DoWorkEventHandler( SaveFileWorker_DoWork );
-            fileSaveWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler( SaveFileWorker_RunWorkerCompleted );*/
+            widthSize_ValueChanged(null, null);
 
             progressTimer.Tick += progressTimer_Tick;
             progressTimer.Interval = 1000;
         }
 
-        private void saveFolderFounder_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            saveFolder.Text = saveFolderPath;
-        }
-
-        private void saveFolderFounder_DoWork( object sender, DoWorkEventArgs e )
-        {
-            saveFolderPath = FolderSelector.FindFreeDirectory();
-
-            Directory.CreateDirectory( saveFolderPath );
-        }
-
-        private void progressTimer_Tick( object sender, EventArgs e )
+        private void progressTimer_Tick(object sender, EventArgs e)
         {
             busyIndicator.PercentCompleted = workingPercent;
         }
 
-        private async void SelectPhoto( object sender, RoutedEventArgs e )
+        private async void SelectPhoto(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog();
 
@@ -79,7 +57,7 @@ namespace PhotoDecreaser
 
             var result = dialog.ShowDialog();
 
-            if ( !result.HasValue || !result.Value )
+            if (!result.HasValue || !result.Value)
                 return;
 
             busyIndicator.IsBusy = true;
@@ -90,9 +68,9 @@ namespace PhotoDecreaser
             progressTimer.Start();
 
             await Task.Factory.StartNew(
-                () => OpenFiles(fileNames), 
-                CancellationToken.None, 
-                TaskCreationOptions.None, 
+                () => OpenFiles(fileNames),
+                CancellationToken.None,
+                TaskCreationOptions.None,
                 TaskScheduler.Default);
 
             OpenSelectedFilesCompleted();
@@ -109,18 +87,18 @@ namespace PhotoDecreaser
         {
             photosGrid.Children.Clear();
 
-            foreach ( var photo in files )
+            foreach (var photo in files)
             {
                 var newImage = new Image
                 {
                     Source = photo.Photo,
                     Tag = photo,
-                    Margin = new Thickness( 10 )
+                    Margin = new Thickness(10)
                 };
 
                 newImage.MouseLeftButtonUp += newImage_MouseLeftButtonUp;
 
-                photosGrid.Children.Add( newImage );
+                photosGrid.Children.Add(newImage);
             }
 
             photoCount.Text = "Количество фотографий: " + files.Count;
@@ -128,7 +106,7 @@ namespace PhotoDecreaser
             busyIndicator.IsBusy = false;
         }
 
-        private void OpenFiles( IEnumerable<string> fileNames )
+        private void OpenFiles(IEnumerable<string> fileNames)
         {
             var filesToOpen = fileNames.ToList();
 
@@ -140,7 +118,7 @@ namespace PhotoDecreaser
                 {
                     var file = new PhotoInfo(name);
 
-                    finishedCount++;
+                    Interlocked.Increment(ref finishedCount);
 
                     files.Add(file);
                 }
@@ -155,35 +133,32 @@ namespace PhotoDecreaser
             GC.Collect();
         }
 
-        private void newImage_MouseLeftButtonUp( object sender, MouseButtonEventArgs e )
+        private void newImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var img = e.OriginalSource as Image;
 
-            if ( img == null )
+            var photo = img?.Tag as PhotoInfo;
+
+            if (photo == null)
                 return;
 
-            var photo = img.Tag as PhotoInfo;
+            var result = MessageBox.Show("Удалить выбранное изображение?", "Удаление фотографии", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            if ( photo == null )
+            if (result != MessageBoxResult.Yes)
                 return;
 
-            var result = MessageBox.Show( "Удалить выбранное изображение?", "Удаление фотографии", MessageBoxButton.YesNo, MessageBoxImage.Question );
-
-            if ( result != MessageBoxResult.Yes )
-                return;
-
-            files.Remove( photo );
-            photosGrid.Children.Remove( img );
+            files.Remove(photo);
+            photosGrid.Children.Remove(img);
         }
 
-        private async void SavePhoto( object sender, RoutedEventArgs e )
+        private async void SavePhoto(object sender, RoutedEventArgs e)
         {
             workingPercent = 0;
             progressTimer.Start();
 
             busyIndicator.IsBusy = true;
 
-            await Task.Factory.StartNew(SaveFileWorker_DoWork, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await SaveFileWorker_DoWork();
             SaveFileWorker_RunWorkerCompleted();
         }
 
@@ -194,29 +169,37 @@ namespace PhotoDecreaser
             progressTimer.Stop();
         }
 
-        private void SaveFileWorker_DoWork()
+        private async Task SaveFileWorker_DoWork()
         {
-            for ( var i = 0; i < files.Count; i++ )
+            var currentFileIndex = 1;
+            var savedFiles = 0;
+            var saveTasks = files.AsParallel().Select(async file =>
             {
-                var file = files[ i ];
+                Interlocked.Increment(ref currentFileIndex);
 
-                var newFile = Path.Combine( saveFolderPath, ( i + 1 ) + ".jpg" );
+                var newFile = Path.Combine(saveFolderPath, (currentFileIndex + 1) + ".jpg");
 
-                file.SaveFile( newFile );
+                await file.SaveFileAsync(newFile);
 
-                workingPercent = ( 100 * ( i + 1 ) ) / files.Count;
-            }
+                Interlocked.Increment(ref savedFiles);
+
+                workingPercent = (100 * (savedFiles + 1)) / files.Count;
+
+                Thread.MemoryBarrier();
+            }).ToArray();
+
+            await Task.WhenAll(saveTasks);
         }
 
-        private void SelectSaveFolder( object sender, RoutedEventArgs e )
+        private void SelectSaveFolder(object sender, RoutedEventArgs e)
         {
-            using ( var saveDialog = new FolderBrowserDialog() )
+            using (var saveDialog = new FolderBrowserDialog())
             {
                 saveDialog.SelectedPath = saveFolderPath;
 
                 var dialogResult = saveDialog.ShowDialog();
 
-                if ( dialogResult != System.Windows.Forms.DialogResult.OK )
+                if (dialogResult != System.Windows.Forms.DialogResult.OK)
                     return;
 
                 saveFolderPath = saveDialog.SelectedPath;
@@ -225,18 +208,18 @@ namespace PhotoDecreaser
             }
         }
 
-        private void widthSize_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+        private void widthSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var value = Math.Pow( 2, widthSize.Value );
+            var value = Math.Pow(2, widthSize.Value);
 
-            if ( photosGrid != null )
+            if (photosGrid != null)
             {
                 photosGrid.ItemHeight = value;
                 photosGrid.ItemWidth = value;
             }
         }
 
-        private void ClearPhotoGrid( object sender, RoutedEventArgs e )
+        private void ClearPhotoGrid(object sender, RoutedEventArgs e)
         {
             files.Clear();
             RefreshPhotoGrid();
@@ -247,12 +230,12 @@ namespace PhotoDecreaser
             progressTimer.Dispose();
         }
 
-        private void scrollViewer_MouseWheel( object sender, MouseWheelEventArgs e )
+        private void scrollViewer_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if ( !Keyboard.IsKeyDown( Key.LeftCtrl ) && !Keyboard.IsKeyDown( Key.RightCtrl ) )
+            if (!Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
                 return;
 
-            widthSize.Value += ( ( double )e.Delta ) / 300;
+            widthSize.Value += ((double)e.Delta) / 300;
         }
     }
 }
