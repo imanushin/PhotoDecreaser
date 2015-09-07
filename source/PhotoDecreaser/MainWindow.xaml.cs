@@ -67,11 +67,7 @@ namespace PhotoDecreaser
             workingPercent = 0;
             progressTimer.Start();
 
-            await Task.Factory.StartNew(
-                () => OpenFiles(fileNames),
-                CancellationToken.None,
-                TaskCreationOptions.None,
-                TaskScheduler.Default);
+            await OpenFiles(fileNames);
 
             OpenSelectedFilesCompleted();
         }
@@ -106,17 +102,17 @@ namespace PhotoDecreaser
             busyIndicator.IsBusy = false;
         }
 
-        private void OpenFiles(IEnumerable<string> fileNames)
+        private async Task OpenFiles(IEnumerable<string> fileNames)
         {
             var filesToOpen = fileNames.ToList();
 
             var finishedCount = 0;
 
-            filesToOpen.AsParallel().ForAll(name =>
+            var openFileTasks = filesToOpen.AsParallel().Select(async name =>
             {
                 try
                 {
-                    var file = new PhotoInfo(name);
+                    var file = await PhotoInfo.CreatePhotoAsync(name);
 
                     Interlocked.Increment(ref finishedCount);
 
@@ -124,13 +120,17 @@ namespace PhotoDecreaser
                 }
                 catch (Exception ex)
                 {
+#if DEBUG
                     MessageBox.Show($"Невозможно открыть файл {name} по причине:\n{ex}", "Конвертер фотографий", MessageBoxButton.OK, MessageBoxImage.Error);
+#else
+                    MessageBox.Show($"Невозможно открыть файл {name} по причине:\n{ex.Message}", "Конвертер фотографий", MessageBoxButton.OK, MessageBoxImage.Error);
+#endif
                 }
 
                 workingPercent = (100 * (finishedCount + 1)) / filesToOpen.Count;
-            });
+            }).ToArray();
 
-            GC.Collect();
+            await Task.WhenAll(openFileTasks);
         }
 
         private void newImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
