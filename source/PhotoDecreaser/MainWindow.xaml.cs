@@ -41,6 +41,22 @@ namespace PhotoDecreaser
 
             progressTimer.Tick += progressTimer_Tick;
             progressTimer.Interval = 1000;
+
+            FindSaveFolder();
+        }
+
+        private void FindSaveFolder()
+        {
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            Task.Run(() => {
+                saveFolderPath = FolderSelector.FindFreeDirectory();
+
+                Directory.CreateDirectory(saveFolderPath);
+            }).ContinueWith(t =>
+            {
+                saveFolder.Text = saveFolderPath;
+            }, uiScheduler);
         }
 
         private void progressTimer_Tick(object sender, EventArgs e)
@@ -171,13 +187,10 @@ namespace PhotoDecreaser
 
         private async Task SaveFileWorker_DoWork()
         {
-            var currentFileIndex = 1;
             var savedFiles = 0;
-            var saveTasks = files.AsParallel().Select(async file =>
+            var saveTasks = files.AsParallel().Select(async (file, index) =>
             {
-                Interlocked.Increment(ref currentFileIndex);
-
-                var newFile = Path.Combine(saveFolderPath, (currentFileIndex + 1) + ".jpg");
+                var newFile = Path.Combine(saveFolderPath, (index + 1) + ".jpg");
 
                 await file.SaveFileAsync(newFile);
 
