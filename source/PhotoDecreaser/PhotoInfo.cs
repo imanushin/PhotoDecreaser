@@ -16,7 +16,7 @@ namespace PhotoDecreaser
         {
             photoData = image.source;
 
-            Photo = image.imahe;
+            Photo = image.image;
         }
 
         public static async Task<PhotoInfo> CreatePhotoAsync(string fileName)
@@ -66,7 +66,7 @@ namespace PhotoDecreaser
                     {
                         return new ImageAndSource
                         {
-                            imahe = transformed,
+                            image = transformed,
                             source = scaledImage.ToArray()
                         };
                     }
@@ -108,7 +108,7 @@ namespace PhotoDecreaser
         private class ImageAndSource
         {
             public byte[] source;
-            public BitmapSource imahe;
+            public BitmapSource image;
         }
     }
 }
